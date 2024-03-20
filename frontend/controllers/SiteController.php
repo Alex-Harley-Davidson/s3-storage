@@ -2,6 +2,8 @@
 
 namespace frontend\controllers;
 
+use frontend\helpers\FlashHelper;
+use frontend\models\FileUploadForm;
 use frontend\models\ResendVerificationEmailForm;
 use frontend\models\VerifyEmailForm;
 use Yii;
@@ -15,6 +17,7 @@ use frontend\models\PasswordResetRequestForm;
 use frontend\models\ResetPasswordForm;
 use frontend\models\SignupForm;
 use frontend\models\ContactForm;
+use yii\web\UploadedFile;
 
 /**
  * Site controller
@@ -75,7 +78,22 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        return $this->render('index');
+        $fileUploadForm = new FileUploadForm();
+
+        if (Yii::$app->request->isPost) {
+            $fileUploadForm->file = UploadedFile::getInstance($fileUploadForm, "file");
+            if ($fileUploadForm->upload()) {
+                FlashHelper::setMessageWithLink("successfulDownload", "Файл успешно загружен", "https://cloudyandex.ru");
+//                $path = $fileUploadForm->getPath();
+
+            } else {
+                FlashHelper::setMessage("failedDownload", "В ходе загрузки произошла ошибка");
+            }
+        }
+
+        return $this->render('index', [
+            "fileUploadForm" => $fileUploadForm
+        ]);
     }
 
     /**
