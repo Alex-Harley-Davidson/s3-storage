@@ -2,6 +2,8 @@
 
 namespace frontend\controllers;
 
+use frontend\components\S3Client;
+use frontend\helpers\FileHelper;
 use frontend\helpers\FlashHelper;
 use frontend\models\FileUploadForm;
 use frontend\models\ResendVerificationEmailForm;
@@ -81,14 +83,25 @@ class SiteController extends Controller
         $fileUploadForm = new FileUploadForm();
 
         if (Yii::$app->request->isPost) {
+
             $fileUploadForm->file = UploadedFile::getInstance($fileUploadForm, "file");
+
             if ($fileUploadForm->upload()) {
-                FlashHelper::setMessageWithLink("successfulDownload", "Файл успешно загружен", "https://cloudyandex.ru");
-//                $path = $fileUploadForm->getPath();
+
+                $s3Client = new S3Client();
+                $url = $s3Client->uploadFile(FileHelper::open($fileUploadForm->getPath(), "r"), $fileUploadForm->getFileName());
+
+                if ($url) {
+                    FlashHelper::setMessageWithLink("successfulDownload", "Файл успешно загружен", $url);
+                } else {
+                    FlashHelper::setMessage("failedDownload", "В ходе загрузки во внешнее хранилище произошла ошибка");
+                }
 
             } else {
-                FlashHelper::setMessage("failedDownload", "В ходе загрузки произошла ошибка");
+                FlashHelper::setMessage("failedDownload", "В ходе внутренней загрузки произошла ошибка");
+
             }
+
         }
 
         return $this->render('index', [

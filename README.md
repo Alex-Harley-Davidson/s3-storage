@@ -22,6 +22,20 @@ docker-compose run --rm backend php init
 ```
 Следуем инструкциям консоли: выбор окружения, генерация файлов
 
+Для работы сервиса необходимо добавить в файл конфигурации `frontend/config/params-local.php` 
+следующие данные (варианты не в `<>` можно оставить с указанными значениями):
+
+```
+"s3" => [
+    "key" => <key>,
+    "secretKey" => <secretKey>,
+    "region" => "ru-central1",
+    "bucket" => <bucket>,
+    "defaultAcl" => "public-read",
+    "endpoint" => "https://storage.yandexcloud.net",
+]
+```
+
 Запустить приложение:
 
 ```

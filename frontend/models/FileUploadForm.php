@@ -12,7 +12,9 @@ use yii\base\Model;
 class FileUploadForm extends Model
 {
     public $file;
-    public $path;
+
+    protected $path;
+    protected $fileName;
 
     /**
      * @return array
@@ -42,12 +44,32 @@ class FileUploadForm extends Model
     public function upload(): string|false
     {
         if ($this->validate()) {
-            $path = FileHelper::getUploadPath($this->file);
-            $this->file->saveAs($path);
-            return true;
+            $this->fileName = FileHelper::generateName(20);
+            $this->path = FileHelper::getUploadPath($this->file, $this->fileName);
+            $this->file->saveAs($this->path);
+
+            return $this->path;
         } else {
             return false;
         }
+    }
+
+
+    /**
+     * @return string
+     */
+    public function getPath(): string
+    {
+        return $this->path;
+    }
+
+
+    /**
+     * @return string
+     */
+    public function getFileName(): string
+    {
+        return $this->fileName;
     }
 
 }
